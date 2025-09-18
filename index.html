@@ -1,157 +1,415 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Progressive Overload Tracker</title>
 <style>
-:root{--bg:#0f1724;--card:#0b1220;--muted:#94a3b8;--accent:#10b981}
-body{margin:0;font-family:sans-serif;color:#e6eef6;background:var(--bg)}
-.app{max-width:480px;margin:auto;padding:10px}
-h1{font-size:18px;margin:0}
-.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
-.controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}
-.btn{background:var(--card);border:1px solid rgba(255,255,255,0.08);padding:6px 10px;border-radius:8px;font-size:14px;color:#e6eef6;cursor:pointer}
-.btn.primary{background:linear-gradient(90deg,#06b6d4,#0ea5a4);color:#022;font-weight:600}
-.day-btn{padding:8px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:6px;cursor:pointer}
-.day-btn.active{outline:2px solid var(--accent);background:rgba(16,185,129,0.1)}
-.exercise{border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:8px;margin-bottom:10px;background:rgba(255,255,255,0.02)}
-.ex-head{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
-.set-row{display:grid;grid-template-columns:32px 1fr 1fr;gap:6px;align-items:center;margin-bottom:4px;font-size:13px}
-.input{padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:inherit;font-size:13px}
-.small{font-size:12px;color:var(--muted)}
-.footer-note{font-size:12px;color:var(--muted);margin-top:8px}
-  </style>
+:root{--bg:#0f1724;--card:#0b1220;--muted:#94a3b8;--accent:#10b981;--glass:rgba(255,255,255,0.03)}
+*{box-sizing:border-box}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; margin:0; background:linear-gradient(180deg,#071026 0%, #071a2e 100%); color:#e6eef6;}
+.app{max-width:1100px;margin:28px auto;padding:20px;}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.brand{display:flex;gap:12px;align-items:center;}
+.logo{width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#0ea5a4,#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px}
+h1{margin:0;font-size:20px}
+.controls{display:flex;gap:8px;align-items:center}
+.btn{background:var(--card);border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:8px;color:#e6eef6;cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,#06b6d4,#0ea5a4);color:#022; font-weight:600}
+.grid{display:grid;grid-template-columns:320px 1fr;gap:18px}
+.panel{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+.day-list{display:flex;flex-direction:column;gap:8px}
+.day-btn{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
+.day-btn.active{outline:2px solid rgba(16,185,129,0.18);background:linear-gradient(180deg,rgba(16,185,129,0.04),transparent)}
+.exercise{border-radius:10px;padding:12px;margin-bottom:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+.ex-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.set-row{display:grid;grid-template-columns:48px 80px 80px 80px 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.input{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+.small{font-size:13px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+.footer{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.pr{background:rgba(16,185,129,0.08);padding:6px 8px;border-radius:8px;color:var(--accent);font-weight:600;border:1px solid rgba(16,185,129,0.12)}
+
+.timer{display:flex;gap:8px;align-items:center}
+.timer-display{font-weight:700;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.02);min-width:120px;text-align:center}
+
+.table{width:100%;border-collapse:collapse;margin-top:10px}
+.table th,.table td{padding:8px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.03);font-size:14px}
+.kv{display:flex;gap:6px;align-items:center}
+.badge{padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-weight:600;color:var(--muted)}
+
+.footer-note{font-size:13px;color:var(--muted);margin-top:12px}
+.center{display:flex;justify-content:center;align-items:center}
+.link{color:#93c5fd;text-decoration:underline;cursor:pointer}
+.warn{color:#f97316;font-weight:700}
+</style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="app">
   <div class="header">
-    <h1>Progressive Overload</h1>
+    <div class="brand">
+      <div class="logo">PL</div>
+      <div>
+        <h1>Progressive Overload Tracker — Local</h1>
+        <div class="small">4-day UL/L/FB double progression — stores data in your browser</div>
+      </div>
+    </div>
     <div class="controls">
+      <div class="kv small">Week: <strong id="weekNum">1</strong></div>
       <button class="btn" id="prevWeek">◀</button>
-      <div class="small">Week <strong id="weekNum">1</strong></div>
       <button class="btn" id="nextWeek">▶</button>
-      <button class="btn primary" id="newWeek">New Week</button>
+      <button class="btn primary" id="newWeekBtn">Start New Week</button>
     </div>
   </div>
-  <div id="dayList"></div>
-  <div id="panel"></div>
-  <div class="footer-note">Warm-up + 2 sets (weeks 1-2), 3 sets (week 3+). Data is saved locally.</div>
-  <div class="controls" style="justify-content:center;margin-top:6px">
-    <button class="btn" id="exportBtn">Export CSV</button>
-    <input type="file" id="importBtn" accept=".json" class="btn" style="padding:6px 2px;font-size:12px">
+
+  <div class="grid">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div><strong>Workout Days</strong><div class="small">Click a day to load exercises</div></div>
+        <div class="small">Sets toggle at top</div>
+      </div>
+      <div class="day-list" id="dayList"></div>
+      <div class="note small">Tip: use "Start New Week" to advance week; previous week values are shown next to inputs.</div>
+      <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+      <div>
+        <strong>PRs</strong>
+        <table class="table" id="prTable"><thead><tr><th>Exercise</th><th>PR (kg)</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <div class="panel" id="workPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div><strong id="dayTitle">Day 1 — Lower 1</strong><div class="small" id="daySubtitle"></div></div>
+        <div class="kv">
+          <label class="small">Default Sets</label>
+          <select id="defaultSets" class="input" style="width:60px;margin-left:8px">
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="exList"></div>
+
+      <div class="footer">
+        <div class="kv small"><span class="badge">Volume (week)</span> <strong id="weekVolume">0</strong> kg</div>
+        <div class="kv small"><span class="badge">Total Sessions</span> <strong id="sessionCount">0</strong></div>
+        <div class="kv small" id="progressNotes"></div>
+        <div style="margin-left:auto" class="timer">
+          <input id="restInput" class="input" style="width:70px" value="120" /> <div class="timer-display" id="timerDisplay">02:00</div>
+          <button class="btn" id="timerStart">Start</button>
+          <button class="btn" id="timerStop">Stop</button>
+        </div>
+      </div>
+
+      <div class="footer-note">Notes: Warm-up guidance included in the app body; follow double progression rules: when all sets across an exercise hit top-of-range, increase weight next week.</div>
+    </div>
   </div>
 </div>
 
 <script>
-const EXS=[
-{id:"RDL",day:"Lower 1",name:"RDL",range:"8-10"},
-{id:"LegPress",day:"Lower 1",name:"Leg Press",range:"8-12"},
-{id:"LegCurl",day:"Lower 1",name:"Lying Leg Curl",range:"8-12"},
-{id:"Calf",day:"Lower 1",name:"Standing Calf",range:"8-12"},
-{id:"Crunch",day:"Lower 1",name:"Cable/Machine Crunch",range:"8-12"},
-{id:"DBBench",day:"Upper",name:"DB Bench",range:"8-10"},
-{id:"VBarRow",day:"Upper",name:"V-Bar Row",range:"8-12"},
-{id:"Incline",day:"Upper",name:"Incline DB Bench",range:"8-12"},
-{id:"DBCurl",day:"Upper",name:"DB Curl",range:"8-12"},
-{id:"TriExt",day:"Upper",name:"OH Rope Tricep",range:"8-12"},
-{id:"RearDelt",day:"Upper",name:"Rear Delt / Pec Deck",range:"8-12"},
-{id:"SmithSq",day:"Lower 2",name:"Smith High Bar Squat",range:"8-10"},
-{id:"SeatCurl",day:"Lower 2",name:"Seated Leg Curl",range:"8-12"},
-{id:"LegExt",day:"Lower 2",name:"Leg Ext",range:"8-12"},
-{id:"SeatCalf",day:"Lower 2",name:"Seated Calf",range:"8-15"},
-{id:"Crunch2",day:"Lower 2",name:"Cable/Machine Crunch",range:"8-12"},
-{id:"HipThrust",day:"Full Body",name:"Hip Thrust",range:"8-10"},
-{id:"ChestRow",day:"Full Body",name:"Chest Supported Row",range:"8-12"},
-{id:"Lunge",day:"Full Body",name:"Walking Lunges",range:"6-8"},
-{id:"MachBench",day:"Full Body",name:"Machine Bench",range:"8-12"},
-{id:"LatPull",day:"Full Body",name:"Lat Pulldown",range:"8-12"},
-{id:"TriPush",day:"Full Body",name:"Rope Tricep Push",range:"8-12"},
-{id:"Hammer",day:"Full Body",name:"DB Hammer Curl",range:"8-12"},
-{id:"FacePull",day:"Full Body",name:"Cable Face Pull",range:"8-12"}
+// --- Data model ---
+// Preloaded exercises from your plan
+const EXERCISES = [
+  {id:"RDL", name:"RDL", day:"Lower 1", repsRange:"8-10", muscle:"Hamstrings/Glutes"},
+  {id:"Leg Press", name:"Leg Press", day:"Lower 1", repsRange:"8-12", muscle:"Quads/Glutes"},
+  {id:"Lying Leg Curls", name:"Lying Leg Curls", day:"Lower 1", repsRange:"8-12", muscle:"Hamstrings"},
+  {id:"Standing Calf Raises", name:"Standing Calf Raises", day:"Lower 1", repsRange:"8-12", muscle:"Calves"},
+  {id:"Crunches", name:"Cable/Machine Crunches", day:"Lower 1", repsRange:"8-12", muscle:"Core"},
+
+  {id:"DB Bench", name:"DB Bench Press", day:"Upper", repsRange:"8-10", muscle:"Chest"},
+  {id:"VBar Row", name:"V-Bar Close Grip Cable Row", day:"Upper", repsRange:"8-12", muscle:"Back"},
+  {id:"Incline DB", name:"Incline DB Bench", day:"Upper", repsRange:"8-12", muscle:"Chest"},
+  {id:"DB Curls", name:"DB Curls", day:"Upper", repsRange:"8-12", muscle:"Biceps"},
+  {id:"OH Rope Ext", name:"Cable Overhead Rope Tricep Extension", day:"Upper", repsRange:"8-12", muscle:"Triceps"},
+  {id:"Rear Delt", name:"Reverse Pec Deck / DB Rear Delt Fly", day:"Upper", repsRange:"8-12", muscle:"Rear Delts"},
+
+  {id:"Smith Squat", name:"Smith High Bar Squat", day:"Lower 2", repsRange:"8-10", muscle:"Quads"},
+  {id:"Seated Leg Curls", name:"Seated Leg Curls", day:"Lower 2", repsRange:"8-12", muscle:"Hamstrings"},
+  {id:"Leg Extensions", name:"Leg Extensions", day:"Lower 2", repsRange:"8-12", muscle:"Quads"},
+  {id:"Seated Calf Raises", name:"Seated Calf Raises", day:"Lower 2", repsRange:"8-15", muscle:"Calves"},
+  {id:"Crunches2", name:"Cable/Machine Crunches", day:"Lower 2", repsRange:"8-12", muscle:"Core"},
+
+  {id:"Hip Thrust", name:"Plate Loaded Hip Thrust", day:"Full Body", repsRange:"8-10", muscle:"Glutes"},
+  {id:"Chest Row", name:"Medium Grip Chest Supported Row", day:"Full Body", repsRange:"8-12", muscle:"Back"},
+  {id:"Lunges", name:"Walking Lunges (Barbell or DB)", day:"Full Body", repsRange:"6-8", muscle:"Legs"},
+  {id:"Machine Bench", name:"Machine Bench Press", day:"Full Body", repsRange:"8-12", muscle:"Chest"},
+  {id:"Lat Pulldown", name:"Medium Grip Lat Pulldown", day:"Full Body", repsRange:"8-12", muscle:"Back"},
+  {id:"Tricep Pushdowns", name:"Rope Cable Tricep Pushdowns", day:"Full Body", repsRange:"8-12", muscle:"Triceps"},
+  {id:"DB Hammer", name:"DB Hammer Curls", day:"Full Body", repsRange:"8-12", muscle:"Biceps"},
+  {id:"Face Pulls", name:"Cable Rope Face Pulls", day:"Full Body", repsRange:"8-12", muscle:"Rear Delts"}
 ];
-const STORAGE="plTrackerLogs", META="plTrackerMeta";
-let logs=JSON.parse(localStorage.getItem(STORAGE)||"{}");
-let meta=JSON.parse(localStorage.getItem(META)||"{\"week\":1}");
-let week=meta.week||1;
-let activeDay="Lower 1";
 
-const days=["Lower 1","Upper","Lower 2","Full Body"];
-const dayList=document.getElementById("dayList");
-const panel=document.getElementById("panel");
-const weekNum=document.getElementById("weekNum");
+// localStorage keys
+const STORAGE_KEY = "pl_tracker_logs_v1";
+const META_KEY = "pl_tracker_meta_v1";
 
-function save(){localStorage.setItem(STORAGE,JSON.stringify(logs));localStorage.setItem(META,JSON.stringify({week}));}
+// load logs
+function loadLogs(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return [];
+  try { return JSON.parse(raw); } catch(e){ console.error("Failed parse logs",e); return []; }
+}
+function saveLogs(logs){ localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); }
 
-function renderDays(){
-  dayList.innerHTML="";
-  days.forEach(d=>{
-    const div=document.createElement("div");
-    div.textContent=d;div.className="day-btn"+(d===activeDay?" active":"");
-    div.onclick=()=>{activeDay=d;renderPanel();renderDays();};
-    dayList.appendChild(div);
+// meta: week counter, currentWeek
+function loadMeta(){
+  const raw = localStorage.getItem(META_KEY);
+  if(!raw) return {week:1, currentWeek:1};
+  try { return JSON.parse(raw); } catch(e){ return {week:1,currentWeek:1}; }
+}
+function saveMeta(m){ localStorage.setItem(META_KEY, JSON.stringify(m)); }
+
+let logs = loadLogs();
+let meta = loadMeta();
+
+// UI helpers
+const dayOrder = ["Lower 1","Upper","Lower 2","Full Body"];
+const dayListEl = document.getElementById("dayList");
+const exListEl = document.getElementById("exList");
+const dayTitleEl = document.getElementById("dayTitle");
+const daySubtitleEl = document.getElementById("daySubtitle");
+const weekNumEl = document.getElementById("weekNum");
+const defaultSetsEl = document.getElementById("defaultSets");
+const weekVolumeEl = document.getElementById("weekVolume");
+const sessionCountEl = document.getElementById("sessionCount");
+const prTableBody = document.querySelector("#prTable tbody");
+const progressNotesEl = document.getElementById("progressNotes");
+
+let activeDay = "Lower 1";
+let viewWeek = meta.currentWeek || meta.week || 1;
+
+// render day buttons
+function renderDayButtons(){
+  dayListEl.innerHTML = "";
+  dayOrder.forEach(d => {
+    const btn = document.createElement("div");
+    btn.className = "day-btn" + (d===activeDay? " active":"");
+    btn.innerHTML = `<div><strong>${d}</strong><div class="small">${getExercisesForDay(d).map(e=>e.name).slice(0,3).join(", ")}${getExercisesForDay(d).length>3?"…":""}</div></div><div class="small">${countLoggedForDayWeek(d, viewWeek)} entries</div>`;
+    btn.onclick = ()=>{ activeDay = d; renderExercises(); renderDayButtons(); };
+    dayListEl.appendChild(btn);
   });
 }
 
-function renderPanel(){
-  panel.innerHTML=""; weekNum.textContent=week;
-  EXS.filter(e=>e.day===activeDay).forEach(ex=>{
-    const card=document.createElement("div"); card.className="exercise";
-    card.innerHTML=`<div class="ex-head"><strong>${ex.name}</strong><span class="small">(${ex.range})</span></div>`;
-    // warm-up
-    card.appendChild(setRow("W",ex.id,week,"warm"));
-    const sets=(week>=3?3:2);
-    for(let s=1;s<=sets;s++) card.appendChild(setRow(s,ex.id,week,s));
-        panel.appendChild(card);
-  });
+// get exercises for a day
+function getExercisesForDay(day){ return EXERCISES.filter(e=>e.day===day); }
+
+// count logged entries for day/week
+function countLoggedForDayWeek(day, week){
+  return logs.filter(l=>l.week===week && l.day===day).length;
 }
 
-function setRow(label,eid,wk,set){
-  const row=document.createElement("div"); row.className="set-row";
-  const key=`${wk}_${eid}_${set}`;
-  const data=(logs[key]||{weight:"",reps:""});
-  row.innerHTML=`<div class="small">${label}</div>
-    <input class="input" placeholder="kg" value="${data.weight||""}">
-    <input class="input" placeholder="reps" value="${data.reps||""}">`;
-  const [w,r]=row.querySelectorAll("input");
-  w.onchange=r.onchange=()=>{
-    logs[key]={weight:w.value,reps:r.value};
-    save();
-  };
-  return row;
-}
+// week navigation
+document.getElementById("prevWeek").onclick = ()=>{ viewWeek = Math.max(1, viewWeek-1); renderAll(); };
+document.getElementById("nextWeek").onclick = ()=>{ viewWeek = viewWeek+1; renderAll(); };
+document.getElementById("newWeekBtn").onclick = ()=>{ meta.week = (meta.week||1)+1; meta.currentWeek = meta.week; saveMeta(meta); viewWeek = meta.currentWeek; renderAll(); alert("Started week "+meta.week+". This is now the active week — log your sets for this week."); };
 
-// week buttons
-document.getElementById("prevWeek").onclick=()=>{if(week>1){week--;renderPanel();save();}};
-document.getElementById("nextWeek").onclick=()=>{week++;renderPanel();save();};
-document.getElementById("newWeek").onclick=()=>{week++;renderPanel();save();};
-
-// export
-document.getElementById("exportBtn").onclick=()=>{
-  let csv="Week,Day,Exercise,Set,Weight,Reps\\n";
-  Object.keys(logs).forEach(k=>{
-    const [wk,eid,set]=k.split("_");
-    const ex=EXS.find(e=>e.id===eid);
-    csv+=`${wk},${ex.day},${ex.name},${set},${logs[k].weight},${logs[k].reps}\\n`;
-  });
-  const blob=new Blob([csv],{type:"text/csv"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");a.href=url;a.download="log.csv";a.click();
-  URL.revokeObjectURL(url);
+// timer
+let timerInterval = null;
+function formatTime(s){ const m=Math.floor(s/60); const ss=s%60; return String(m).padStart(2,'0')+":"+String(ss).padStart(2,'0'); }
+document.getElementById("timerDisplay").textContent = formatTime(parseInt(document.getElementById("restInput").value||120,10));
+document.getElementById("restStart")?.addEventListener("click", ()=>{});
+document.getElementById("timerStart").onclick = ()=>{
+  let t = parseInt(document.getElementById("restInput").value||120,10);
+  document.getElementById("timerDisplay").textContent = formatTime(t);
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    t--; document.getElementById("timerDisplay").textContent = formatTime(t);
+    if(t<=0){ clearInterval(timerInterval); navigator.vibrate?.(200); }
+  },1000);
 };
+document.getElementById("timerStop").onclick = ()=>{ clearInterval(timerInterval); };
 
-// import
-document.getElementById("importBtn").onchange=e=>{
-  const f=e.target.files[0]; if(!f)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    try{logs=JSON.parse(ev.target.result);save();renderPanel();alert("Import ok");}
-    catch{alert("Bad JSON");}
+// utilities for logs
+function getWeekOfDateISO(d){
+  // simple incremental week id stored in meta; we use meta.week as week number, not ISO date-week for simplicity
+  return d.week;
+}
+
+// add a set log
+function addLog(entry){
+  logs.push(entry); saveLogs(logs); renderAll();
+}
+
+// find last week logs for exercise (previous week = viewWeek-1)
+function previousWeekLogsForExercise(exId, week){
+  const prev = week-1;
+  return logs.filter(l=>l.exerciseId===exId && l.week===prev);
+}
+
+// compute PRs
+function computePRs(){
+  const prMap = {};
+  logs.forEach(l=>{
+    const id=l.exerciseId;
+    if(!prMap[id] || (parseFloat(l.weight)||0) > prMap[id]) prMap[id] = parseFloat(l.weight)||0;
+  });
+  return prMap;
+}
+
+// compute week volume for viewWeek
+function computeWeekVolume(week){
+  return logs.filter(l=>l.week===week).reduce((s,l)=>s + ((parseFloat(l.weight)||0) * (parseFloat(l.reps)||0)), 0);
+}
+
+// get session count (distinct dates) in week
+function getSessionCount(week){
+  const set = new Set(logs.filter(l=>l.week===week).map(l=>l.date));
+  return set.size;
+}
+
+// render PR table
+function renderPRs(){
+  const pr = computePRs();
+  prTableBody.innerHTML = "";
+  EXERCISES.forEach(e=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${e.name}</td><td>${pr[e.id] ? pr[e.id].toFixed(1) : "-"}</td>`;
+    prTableBody.appendChild(tr);
+  });
+}
+
+// render exercises for active day
+function renderExercises(){
+  dayTitleEl.textContent = "Day — " + activeDay;
+  daySubtitleEl.textContent = "Week " + viewWeek + " — Double progression: upper/lower/full";
+  exListEl.innerHTML = "";
+  const defaultSets = parseInt(defaultSetsEl.value,10);
+  const exs = getExercisesForDay(activeDay);
+  exs.forEach(ex=>{
+    const el = document.createElement("div");
+    el.className = "exercise";
+    const prevLogs = previousWeekLogsForExercise(ex.id, viewWeek);
+    const prevBySet = {};
+    prevLogs.forEach(pl=>{ prevBySet[pl.setNo] = pl; });
+    const topRange = parseInt(ex.repsRange.split("-").pop(),10);
+    el.innerHTML = `<div class="ex-head"><div><strong>${ex.name}</strong> <span class="small">(${ex.repsRange} reps)</span></div><div class="small">Muscle: ${ex.muscle}</div></div>`;
+    // sets rows
+    const setsCount = defaultSets;
+    for(let s=1;s<=setsCount;s++){
+      const prev = prevBySet[s];
+      const prevText = prev ? (prev.weight + "kg × " + prev.reps) : "-";
+      const row = document.createElement("div"); row.className = "set-row";
+      row.innerHTML = `
+        <div class="small center">${s}</div>
+        <input class="input" placeholder="Weight kg" data-ex="${ex.id}" data-set="${s}" data-field="weight" />
+        <input class="input" placeholder="Reps" data-ex="${ex.id}" data-set="${s}" data-field="reps" />
+        <div class="small" style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.01)">${prevText}</div>
+        <div class="small" id="note-${ex.id}-${s}"></div>
+      `;
+      // attach save on change
+      row.querySelectorAll("input").forEach(inp=>{
+        inp.addEventListener("change", (ev)=>{
+          const weight = row.querySelector('input[data-field="weight"]').value;
+          const reps = row.querySelector('input[data-field="reps"]').value;
+          // store log immediately for this week
+          const entry = {
+            id: "log_"+Date.now()+"_"+Math.random().toString(36).slice(2,8),
+            date: new Date().toISOString().slice(0,10),
+            week: viewWeek,
+            day: activeDay,
+            exerciseId: ex.id,
+            exerciseName: ex.name,
+            setNo: s,
+            weight: weight?parseFloat(weight):0,
+            reps: reps?parseInt(reps):0
+          };
+          // replace any existing for same week/day/ex/set
+          logs = logs.filter(l=> !(l.week===entry.week && l.day===entry.day && l.exerciseId===entry.exerciseId && l.setNo===entry.setNo) );
+          logs.push(entry); saveLogs(logs); renderAll();
+        });
+      });
+      el.appendChild(row);
+    }
+    // progression helper: check if all sets >= topRange
+    const checkBtn = document.createElement("button"); checkBtn.className="btn"; checkBtn.textContent="Check Progression";
+    checkBtn.onclick = ()=>{
+      const all = logs.filter(l=>l.week===viewWeek && l.exerciseId===ex.id);
+      const setsOk = (function(){
+        if(all.length < setsCount) return false;
+        for(let i=1;i<=setsCount;i++){
+          const s = all.find(x=>x.setNo===i);
+          if(!s || (s.reps < topRange)) return false;
+        }
+        return true;
+      })();
+      const noteEl = document.createElement("div"); noteEl.className="note small";
+      if(setsOk) noteEl.innerHTML = `<span class="pr">All sets hit ${topRange} reps — increase weight next week.</span>`;
+      else noteEl.innerHTML = `Not all sets reached ${topRange} reps yet.`;
+      // remove existing note in el footer
+      const existing = el.querySelector(".note"); if(existing) existing.remove();
+      el.appendChild(noteEl);
+    };
+    el.appendChild(checkBtn);
+    exListEl.appendChild(el);
+  });
+}
+
+// render header counters and pr table
+function renderCounters(){
+  weekNumEl.textContent = viewWeek;
+  weekVolumeEl.textContent = computeWeekVolume(viewWeek).toFixed(1);
+  sessionCountEl.textContent = getSessionCount(viewWeek);
+  renderPRs();
+}
+
+// full render
+function renderAll(){
+  renderDayButtons();
+  renderExercises();
+  renderCounters();
+  // progress notes (summary of exercises ready to increase)
+  const ready = EXERCISES.filter(e=>{
+    const top = parseInt(e.repsRange.split("-").pop(),10);
+    const all = logs.filter(l=>l.week===viewWeek && l.exerciseId===e.id);
+    if(all.length===0) return false;
+    // need at least defaultSets entries for the day in this week (we'll approximate)
+    const defaultSets = parseInt(defaultSetsEl.value,10);
+    for(let i=1;i<=defaultSets;i++){
+      const s = all.find(x=>x.setNo===i);
+      if(!s || s.reps < top) return false;
+    }
+    return true;
+  });
+  if(ready.length>0) progressNotesEl.innerHTML = `<span class="pr">${ready.length} exercises ready to increase next week</span>`;
+  else progressNotesEl.innerHTML = `<span class="small">No exercises ready to increase</span>`;
+}
+
+// initial render
+renderAll();
+
+// export/import data
+function exportData(){
+  const blob = new Blob([JSON.stringify({logs,meta,exercises:EXERCISES},null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href=url; a.download="pl_tracker_export_"+(new Date().toISOString().slice(0,10))+".json"; a.click();
+}
+function importData(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(data.logs) logs = data.logs;
+      if(data.meta) meta = data.meta;
+      saveLogs(logs); saveMeta(meta); renderAll(); alert("Imported data");
+    }catch(e){ alert("Import failed: "+e.message); }
   };
-  reader.readAsText(f);
-};
+  reader.readAsText(file);
+}
 
-renderDays();renderPanel();
+// keyboard shortcuts: E to export, I to import
+document.addEventListener("keydown", (e)=>{
+  if(e.key==='e' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); exportData(); }
+});
+
+// simple buttons to export/import appended to header
+const hdrControls = document.createElement("div");
+hdrControls.style.display="flex"; hdrControls.style.gap="8px"; hdrControls.style.alignItems="center";
+const expBtn = document.createElement("button"); expBtn.className="btn"; expBtn.textContent="Export JSON (Ctrl/Cmd+E)"; expBtn.onclick=exportData;
+const impBtn = document.createElement("input"); impBtn.type="file"; impBtn.accept=".json"; impBtn.style.display="inline-block"; impBtn.onchange=(ev)=>importData(ev.target.files[0]);
+hdrControls.appendChild(expBtn); hdrControls.appendChild(impBtn);
+document.querySelector(".controls").appendChild(hdrControls);
+
 </script>
 </body>
 </html>
