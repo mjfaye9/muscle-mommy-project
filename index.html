@@ -21,7 +21,7 @@ h1{font-size:18px;margin:0}
 .input{padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:inherit;font-size:13px}
 .small{font-size:12px;color:var(--muted)}
 .footer-note{font-size:12px;color:var(--muted);margin-top:8px}
-</style>
+  style>
 </head>
 <body>
 <div class="app">
@@ -50,7 +50,7 @@ const EXS=[
 {id:"LegCurl",day:"Lower 1",name:"Lying Leg Curl",range:"8-12"},
 {id:"Calf",day:"Lower 1",name:"Standing Calf",range:"8-12"},
 {id:"Crunch",day:"Lower 1",name:"Cable/Machine Crunch",range:"8-12"},
-{id:"DBBench",day:"Upper",name:"DB Bench",range:"8-10"},
+  {id:"DBBench",day:"Upper",name:"DB Bench",range:"8-10"},
 {id:"VBarRow",day:"Upper",name:"V-Bar Row",range:"8-12"},
 {id:"Incline",day:"Upper",name:"Incline DB Bench",range:"8-12"},
 {id:"DBCurl",day:"Upper",name:"DB Curl",range:"8-12"},
@@ -72,7 +72,7 @@ const EXS=[
 ];
 const STORAGE="plTrackerLogs", META="plTrackerMeta";
 let logs=JSON.parse(localStorage.getItem(STORAGE)||"{}");
-let meta=JSON.parse(localStorage.getItem(META)||"{"week":1}");
+let meta=JSON.parse(localStorage.getItem(META)||"{\"week\":1}");
 let week=meta.week||1;
 let activeDay="Lower 1";
 
@@ -98,10 +98,11 @@ function renderPanel(){
   EXS.filter(e=>e.day===activeDay).forEach(ex=>{
     const card=document.createElement("div"); card.className="exercise";
     card.innerHTML=`<div class="ex-head"><strong>${ex.name}</strong><span class="small">(${ex.range})</span></div>`;
+    // warm-up
     card.appendChild(setRow("W",ex.id,week,"warm"));
     const sets=(week>=3?3:2);
     for(let s=1;s<=sets;s++) card.appendChild(setRow(s,ex.id,week,s));
-    panel.appendChild(card);
+        panel.appendChild(card);
   });
 }
 
@@ -120,16 +121,18 @@ function setRow(label,eid,wk,set){
   return row;
 }
 
+// week buttons
 document.getElementById("prevWeek").onclick=()=>{if(week>1){week--;renderPanel();save();}};
 document.getElementById("nextWeek").onclick=()=>{week++;renderPanel();save();};
 document.getElementById("newWeek").onclick=()=>{week++;renderPanel();save();};
 
+// export
 document.getElementById("exportBtn").onclick=()=>{
-  let csv="Week,Day,Exercise,Set,Weight,Reps\n";
+  let csv="Week,Day,Exercise,Set,Weight,Reps\\n";
   Object.keys(logs).forEach(k=>{
     const [wk,eid,set]=k.split("_");
     const ex=EXS.find(e=>e.id===eid);
-    csv+=`${wk},${ex.day},${ex.name},${set},${logs[k].weight},${logs[k].reps}\n`;
+    csv+=`${wk},${ex.day},${ex.name},${set},${logs[k].weight},${logs[k].reps}\\n`;
   });
   const blob=new Blob([csv],{type:"text/csv"});
   const url=URL.createObjectURL(blob);
@@ -137,6 +140,7 @@ document.getElementById("exportBtn").onclick=()=>{
   URL.revokeObjectURL(url);
 };
 
+// import
 document.getElementById("importBtn").onchange=e=>{
   const f=e.target.files[0]; if(!f)return;
   const reader=new FileReader();
